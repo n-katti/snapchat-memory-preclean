@@ -13,7 +13,10 @@ os.chdir(location_parent)
 
 
 def convert_date_format(input_date, pic_name, year):
-    # Parse the input date string
+    '''
+    Function that takes in a string date of format Month-dd and converts it to MM_DD
+    It seems to fail with February 29, so that will return an exception
+    '''
     try:
         date_object = datetime.strptime(input_date, "%B-%d")
 
@@ -26,6 +29,13 @@ def convert_date_format(input_date, pic_name, year):
         print(f"Error converting date on {pic_name} in folder {year}. Error message")
 
 def get_all_pics():
+    '''
+    Searches through all year folders, gets names of pictures, extracts the date and executes
+    the date conversion function and creates a dataframe with the following columns:
+    1) old name
+    2) new name
+    3) year
+    '''
     # get a list of all files in the parent folder
     files = os.listdir(location_parent)
 
@@ -37,28 +47,32 @@ def get_all_pics():
     pic_list = []
 
     for folder in folders:
-
+        
+        # Gets a list of all pictures in the folder
         pictures_names = os.listdir(location_parent / folder)
 
+        # Loop through each picture. Extract the date. Create a new file name with the converted date 
         for pic in pictures_names:
             match = re.match(pattern, pic)
             if match:
                 original_date = f"{match.group(1)}-{match.group(2)}"
                 new_date = f"{folder}_{convert_date_format(original_date, pic, folder)}"
-                # ending = str.replace(match.group(3), '-short', '')
-                # ending = str.replace(ending, '-', '_')
                 ending = match.group(4)
                 new_pic = f"{new_date}{ending}"
                 # print(new_pic)
                 
+                # Append the info into a list
                 all_info = []
                 all_info.append(pic)
                 all_info.append(new_pic)
                 all_info.append(folder)
+
+                # Append each picture's info into an overarching list of all pictures
                 pic_list.append(all_info)
             else:
                 continue
-        
+    
+    # Convert to a df
     return pd.DataFrame(pic_list, columns=['old', 'new', 'year'])
 
 def custom_sort(value):
@@ -73,23 +87,19 @@ def custom_sort(value):
     
     return (non_numeric, numeric)
 
-def create_path(value):
-    '''
-    Generates a string path
-    '''
-
-    return os.path.join(location_parent, value['year'], )
-
 def renumber_files(df):
+    '''
+    Create a row number that will increment when there are multiple rows with the same new file name
+    This will sort based on the old file name ascending 
+    This method is being used as I deleted some pics when I cleaned up these memories
+    So there are files tagged with _1 that are the only file from that day
+    This will make sure that every date starts at 00 
+    '''
 
     # Create a sort key column using custom sort function
     df['sort_key'] = df['old'].apply(custom_sort)
 
-    # Create a row number that will increment when there are multiple rows with the same new file name
-    # This will sort based on the old file name ascending 
-    # This method is being used as I deleted some pics when I cleaned up these memories
-    # So there are files tagged with _1 that are the only file from that day
-    # This will make sure that every date starts at 00 
+
     df['row_number'] = df.sort_values(['new', 'sort_key'], ascending=[True, True]).groupby('new').cumcount() + 1
 
     # Create a padded row number 
@@ -109,6 +119,9 @@ def renumber_files(df):
     return df
 
 def rename_files(row):
+    '''
+    Renames and copies the files into an Output folder
+    '''
     output_folder = location_parent / 'Output'
     try:
         os.makedirs(output_folder,  exist_ok=True)
@@ -120,11 +133,15 @@ def rename_files(row):
         print(f"Error {e}")
 
 
-df = get_all_pics()
-df = renumber_files(df=df)
+def main():
 
-tqdm.pandas(desc="Renaming Files", unit="row")
-df.progress_apply(lambda row: rename_files(row), axis=1)
-        
+    df = get_all_pics()
+    df = renumber_files(df=df)
+
+    tqdm.pandas(desc="Renaming Files", unit="row")
+    df.progress_apply(lambda row: rename_files(row), axis=1)
+
+if __name__ == "__main__":
+    main()
 
 
