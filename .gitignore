@@ -1,1 +1,5 @@
-input
+# exclude everything
+input/*
+
+# exception to the rule
+!input/.gitkeep
