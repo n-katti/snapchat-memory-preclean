@@ -10,7 +10,7 @@ python -m pip install -r requirements.txt
 
 ## Use Case 1: Renaming All Photos Outputted from Snapchat Memory Downloader
 1. Download your snapchat memories. Only select the json output option. Merge them with their metadata using [Snapchat Memory Downloader](https://downloadmysnapchatmemories.com/)
-2. Drop folders of snapchat memories in the same root folder as the `main.py` script (the folders are named by year e.g. one folder for 2017, one for 2018, etc.)
+2. Drop folders of snapchat memories in the `snapchat-memory-precleaning/input` folder (the folders are named by year e.g. one folder for 2017, one for 2018, etc.)
 3. This will rename all pictures to a more sortable format, create copies, and consolidate all pictures into a folder called `Output` 
 
 ### Notes: 
