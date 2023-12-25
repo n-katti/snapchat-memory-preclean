@@ -13,17 +13,31 @@ location_parent = location.parent / 'input'
 input = Path(r'C:\Users\nikhi\OneDrive\Documents\Python Projects\snapchat-memory-overlay\input')
 
 def main():
+    #####
+    # USE CASE 1
+    #####
     # Renames files downloaded directly from Snapchat to remove prefixed dates
     # rf.rename_without_date_prefix(input / 'memories')
 
-    # For files downloaded through Snapchat Memory Downloader, this renames/renumbers the files
-    df = rd.get_all_pics(location_parent=location_parent)
-    df = rd.renumber_files(df=df, location_parent=location_parent)
-
-    tqdm.pandas(desc="Renaming Files", unit="row")
-    df.progress_apply(lambda row: rd.rename_files(row, location_parent=location_parent), axis=1)
-
+    # Then gets a list of pics with overlays
     # eon.output_json_with_only_overlays(input=input)
+
+    #####
+    # USE CASE 2
+    #####
+    # For files downloaded through Snapchat Memory Downloader, this renames/renumbers the files
+    edit_media = rd.MediaEditor(location_parent=location_parent)
+    vids = edit_media.process_videos()
+    vids = edit_media.renumber_videos(df=vids)
+
+    pics = edit_media.process_pictures()
+    pics = edit_media.renumber_pics(df=pics)
+    edit_media.rename_and_output_pics(df=pics)
+
+    tqdm.pandas(desc="Processing and Renaming Videos", unit="row")
+    print('-----------------------')
+    vids.progress_apply(lambda row: edit_media.rename_and_output_videos(row), axis=1)
+
 
 if __name__ == "__main__":
     main()

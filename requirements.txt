@@ -1,8 +1,6 @@
 pathlib
 datetime
 tqdm
-os
-re
 pandas
-shutil
-urllib
+Pillow
+piexif
