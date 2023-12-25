@@ -3,7 +3,7 @@ from pathlib import Path
 import json
 from urllib.parse import parse_qs, urlparse
 
-def output_json_with_only_overlays(input):
+def output_json_with_only_overlays(input: Path):
     # Set paths
     memories = input / 'memories'
     memories_json = input / 'memories_history.json'
